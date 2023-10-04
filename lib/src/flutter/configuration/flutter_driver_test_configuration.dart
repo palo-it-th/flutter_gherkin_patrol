@@ -28,6 +28,7 @@ class FlutterDriverTestConfiguration extends FlutterTestConfiguration {
     this.targetAppWorkingDirectory,
     this.buildFlavour,
     this.targetDeviceId,
+    this.dartDefineArgs,
     this.runningAppProtocolEndpointUri,
     this.onBeforeFlutterDriverConnect,
     this.onAfterFlutterDriverConnect,
@@ -102,6 +103,10 @@ class FlutterDriverTestConfiguration extends FlutterTestConfiguration {
   /// The target device id to run the tests against when multiple devices detected
   /// Defaults to null
   final String? targetDeviceId;
+
+  /// `--dart-define` args to pass into the build parameters. Include the name and value
+  /// for each. For example, `--dart-define=MY_VAR="true"` becomes `['MY_VAR="true"']`
+  final List<String>? dartDefineArgs;
 
   /// Will keep the Flutter application running when done testing
   /// Defaults to false
@@ -219,6 +224,7 @@ class FlutterDriverTestConfiguration extends FlutterTestConfiguration {
       targetAppPath: targetAppPath,
       targetAppWorkingDirectory: targetAppWorkingDirectory,
       targetDeviceId: targetDeviceId,
+
       createWorld: (config) async {
         FlutterWorld? world;
         if (providedCreateWorld != null) {
