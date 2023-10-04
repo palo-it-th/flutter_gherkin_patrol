@@ -1,10 +1,15 @@
 library flutter_gherkin;
 
+/// ***************************************
+/// Library export for use with integration_test with include reference to flutter_test which reference dart:ui
+/// which are not allowed when running tests with flutter_driver hence this separate library declaration file
+/// ***************************************
+
 // Flutter specific implementations
-export 'src/flutter/build_mode.dart';
-export 'src/flutter/flutter_world.dart';
-export 'src/flutter/flutter_test_configuration.dart';
-export 'src/flutter/utils/driver_utils.dart';
+export 'src/flutter/configuration/build_mode.dart';
+export 'src/flutter/world/flutter_world.dart';
+export 'src/flutter/configuration/flutter_test_configuration.dart';
+export 'src/flutter/adapters/app_driver_adapter.dart';
 
 // Well known steps
 export 'src/flutter/steps/given_i_open_the_drawer_step.dart';
@@ -24,9 +29,14 @@ export 'src/flutter/steps/text_exists_within_step.dart';
 export 'src/flutter/steps/wait_until_key_exists_step.dart';
 export 'src/flutter/steps/when_tap_the_back_button_step.dart';
 export 'src/flutter/steps/wait_until_type_exists_step.dart';
+export 'src/flutter/steps/wait_until_key_exists_step.dart';
+export 'src/flutter/steps/take_a_screenshot_step.dart';
 
 // Hooks
 export 'src/flutter/hooks/attach_screenshot_on_failed_step_hook.dart';
 
-// Reporters
-export 'src/flutter/reporters/flutter_driver_reporter.dart';
+// integration_test specific exports
+export 'src/flutter/adapters/widget_tester_app_driver_adapter.dart';
+export 'src/flutter/code_generation/annotations/gherkin_full_test_suite_annotation.dart';
+export 'src/flutter/runners/gherkin_integration_test_runner.dart';
+export 'src/flutter/world/flutter_widget_tester_world.dart';

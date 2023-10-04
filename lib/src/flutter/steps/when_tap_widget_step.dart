@@ -1,6 +1,5 @@
-import 'package:flutter_gherkin/src/flutter/flutter_world.dart';
-import 'package:flutter_gherkin/src/flutter/utils/driver_utils.dart';
-import 'package:flutter_driver/flutter_driver.dart';
+import 'package:flutter_gherkin/src/flutter/adapters/app_driver_adapter.dart';
+import 'package:flutter_gherkin/src/flutter/world/flutter_world.dart';
 import 'package:gherkin/gherkin.dart';
 
 /// Taps the widget found with the given control key.
@@ -10,40 +9,40 @@ import 'package:gherkin/gherkin.dart';
 ///
 /// Examples:
 ///
-///   `When I tap the "controlKey" button"`
-///   `When I tap the "controlKey" element"`
-///   `When I tap the "controlKey" label"`
-///   `When I tap the "controlKey" icon"`
-///   `When I tap the "controlKey" field"`
-///   `When I tap the "controlKey" text"`
-///   `When I tap the "controlKey" widget"`
-StepDefinitionGeneric WhenTapWidget() {
+///   `When I tap "controlKey" button"`
+///   `When I tap "controlKey" element"`
+///   `When I tap "controlKey" label"`
+///   `When I tap "controlKey" icon"`
+///   `When I tap "controlKey" field"`
+///   `When I tap "controlKey" text"`
+///   `When I tap "controlKey" widget"`
+StepDefinitionGeneric whenTapWidget() {
   return when1<String, FlutterWorld>(
     RegExp(
         r'I tap the {string} (?:button|element|label|icon|field|text|widget)$'),
     (key, context) async {
-      final finder = find.byValueKey(key);
+      final finder = context.world.appDriver.findBy(key, FindType.key);
 
-      await context.world.driver?.scrollIntoView(
+      await context.world.appDriver.scrollIntoView(
         finder,
       );
-      await FlutterDriverUtils.tap(
-        context.world.driver,
+      await context.world.appDriver.tap(
         finder,
+        timeout: context.configuration.timeout,
       );
     },
   );
 }
 
-StepDefinitionGeneric WhenTapWidgetWithoutScroll() {
+StepDefinitionGeneric whenTapWidgetWithoutScroll() {
   return when1<String, FlutterWorld>(
     RegExp(
         r'I tap the {string} (?:button|element|label|icon|field|text|widget) without scrolling it into view$'),
     (key, context) async {
-      final finder = find.byValueKey(key);
+      final finder =
+          context.world.appDriver.findByDescendant(key, FindType.key);
 
-      await FlutterDriverUtils.tap(
-        context.world.driver,
+      await context.world.appDriver.tap(
         finder,
       );
     },

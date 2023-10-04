@@ -1,6 +1,5 @@
 import 'package:flutter_gherkin/flutter_gherkin.dart';
 import 'package:gherkin/gherkin.dart';
-import 'package:flutter_driver/flutter_driver.dart';
 
 import '../parameters/existence_parameter.dart';
 
@@ -10,21 +9,20 @@ import '../parameters/existence_parameter.dart';
 ///
 ///   `Then I wait until the "login_loading_indicator" is absent`
 ///   `And I wait until the "login_screen" is present`
-StepDefinitionGeneric WaitUntilKeyExistsStep() {
+StepDefinitionGeneric waitUntilKeyExistsStep() {
   return then2<String, Existence, FlutterWorld>(
     'I wait until the {string} is {existence}',
     (keyString, existence, context) async {
-      await FlutterDriverUtils.waitUntil(
-        context.world.driver,
-        () {
+      await context.world.appDriver.waitUntil(
+        () async {
+          await context.world.appDriver.waitForAppToSettle();
+
           return existence == Existence.absent
-              ? FlutterDriverUtils.isAbsent(
-                  context.world.driver,
-                  find.byValueKey(keyString),
+              ? context.world.appDriver.isAbsent(
+                  context.world.appDriver.findBy(keyString, FindType.key),
                 )
-              : FlutterDriverUtils.isPresent(
-                  context.world.driver,
-                  find.byValueKey(keyString),
+              : context.world.appDriver.isPresent(
+                  context.world.appDriver.findBy(keyString, FindType.key),
                 );
         },
       );

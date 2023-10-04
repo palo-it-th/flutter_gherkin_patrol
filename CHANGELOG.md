@@ -1,3 +1,233 @@
+## [3.0.0-rc.17] - 25/07/2022
+  - Fix #257 - fixed issue when generating a step with a '$' sign in
+  - Fix #256 - Ensure all exceptions generated when running a step are logged
+  - Fix #253 - Ensure features with descriptions that span more than one line are parsed correctly
+  - Fix #252 - Ensure all async code is awaited
+  - When taking a screenshot on the web use the render element rather than relying on native code that does not work
+
+## [3.0.0-rc.16] - 01/07/2022
+  - Fix #231 - using local coordinate system when taking a screenshot on Android (thanks to @youssef-t for the solution)
+  - Fix #216 - ensure step exceptions and `expect` failure results are added as errors to the json report
+  - Scenarios can now have descriptions which also appear in the json reporter output
+
+NOTE: Due to the above changes generated files will need to be re-generated
+
+```
+flutter pub run build_runner clean
+flutter pub run build_runner build --delete-conflicting-outputs
+```
+
+## [3.0.0-rc.15] - 28/06/2022
+  - Exposed `frameBindingPolicy` on the test runner when running tests which can affect how frames are painted and the speed of the test run, I've removed the default value which might be responsible for #231
+
+## [3.0.0-rc.14] - 28/06/2022
+  - Fix #237 - Ensure everything works on the web
+
+## [3.0.0-rc.13] - 27/06/2022
+  - Fix #235 - fix issue taking a screenshot on an Android device
+  - Resolved #170: Added example code to ensure json report is save to disk even when the test run fails. Also added script to generate a HTML report from a JSON report
+
+## [3.0.0-rc.12] - 24/06/2022
+  - Fix #222 - escape single quotation marks in data tables
+
+## [3.0.0-rc.11] - 24/06/2022
+  - Fix #231 - Removed the use of explicitly calling `pumpAndSettle` in the pre-defined steps in favour of the implicit `pumpAndSettle` calls used in the `WidgetTesterAppDriverAdapter`.
+  - Added ability to add a `appLifecyclePumpHandler` to override the default handler that determines how the app is pumped during lifecycle events.  Useful if your app has a long splash screen etc. Parameter is on `executeTestSuite`.
+  - Added ability to ensure feature paths are relative when generating reports `useAbsolutePaths` on the `GherkinTestSuite` attribute
+
+* BREAKING CHANGE: The parameters on `executeTestSuite` are now keyed to allow for the above changes
+
+## [3.0.0-rc.10] - 23/06/2022
+
+- Fix #195: Adding missing export for `wait_until_key_exists_step.dart`
+- Fix #226: Allow compatibility with dev and master flutter branches
+- Feat #218: Allow retry steps in case of intermittent failure by setting the configuration properties `stepMaxRetries` & `retryDelay`
+- Fix #210 & #191: Ability to take screenshots on web
+- Fix #198: Allow the use of implicit pumpAndSettle methods in the app driver to be turned off using the configuration property `waitImplicitlyAfterAction`. Off by default
+
+* BREAKING CHANGE:
+- `NEW API FOR REPORTERS`: All reporters implement (do not extend) separated interfaces see https://github.com/jonsamwell/dart_gherkin/blob/master/CHANGELOG.md#300---16052022
+
+**Note: this release will soon be promoted the main version**
+
+## [3.0.0-rc.9] - 18/11/2021
+
+- Fix: #172: Fix for the `StdoutReporter` when running against the web
+
+## [3.0.0-rc.8] - 18/11/2021
+
+- Fix: #165: Fix when generating empty feature files - many thanks to @AFASbart for the PR.
+
+## [3.0.0-rc.7] - 10/11/2021
+
+- Fix: #165: Empty .feature files causing void functions which get compiled out at runtime and cause errors
+- Fix: #162: Incorrect feature name in HTML reports - many thanks to @AFASbart for suggesting the cause and fix.
+- Fix: #159: Swipe step is not working due to bad '??' statement
+- Fix: #155: Ensure stdout reporter only add ascii colour code when the target supports it
+
+## [3.0.0-rc.6] - 27/10/2021
+
+- BREAKING CHANGE: Made `appMainFunction` return a `Future<void>` so it can be async
+- Fix: #159: Swipe step not working
+- Ensure Hook.onBeforeRun is called before the run starts
+- Set Frame policy- defaults to `LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive` to slightly improve performance
+
+## [3.0.0-rc.5] - 22/06/2021
+
+- Ensure scenario support files (world etc) as always disposed ensure when test throws error 
+
+## [3.0.0-rc.4] - 21/06/2021
+
+- Removed debug code
+
+## [3.0.0-rc.3] - 21/06/2021
+
+- POSSIBLE BREAKING CHANGE: Removed tap call before enterText is invoked in `WidgetTesterAppDriverAdapter` this was due to the fact that it opens the on-screen keyboard which is not closed after the text is entered so it could be blocking further controls from view.
+- Fix: #150: Better handling of JSON strings in multiline string segments in feature files
+- Fix: #141 & #128: Added example of how to generate html report from json report output and fixed all scenarios ending up in the last feature section of the json report
+
+## [3.0.0-rc.2] - 21/06/2021
+
+- Fixed late initialization error when invoking hooks
+- Updated float parameter parser so an exception is not thrown during parsing
+
+## [3.0.0-rc.1] - 25/05/2021
+
+  HUGE update so that the library now works and favours the flutter integration_test package over flutter_driver.  Unfortunately, this will be breaking change to existing users but it has many benefits such as a huge speed and stability improvements.
+
+# BREAKING CHANGES
+
+- `Table` has been renamed to `GherkinTable` to avoid naming clashes
+
+In order to progress this library and add support for the new integration_test package various things have had to be changed to enable this will still supporting Flutter Driver.  The big of which is removing Flutter Driver instance from the `FlutterWorld` instance in favour of an adapter approach whereby driving of the app (whether that is via `flutter_driver` or `WidgetTester`) becomes agnostic see `https://github.com/jonsamwell/flutter_gherkin/blob/f1fb2d4a632362629f5d1a196a0c055f858ad1d7/lib/src/flutter/adapters/app_driver_adapter.dart`.
+
+- `FlutterDriverUtils` has been removed, use `world.appDriver` instead.  You can still access the raw driver if needed via `world.appDriver.nativeDriver`
+- If you are using a custom world object and still want to use Flutter Driver it will need to extend `FlutterDriverWorld` instead of `FlutterWorld` this will give you type safety on the `world.appDriver.nativeDriver` property
+
+The change to use the `integration_test` package is a fundamentally different approach.  Where using the `flutter_driver` implementation your app is launch in a different process and then controlled by remote RPC calls from flutter driver in a different process.  Using the new `integration_test` package your tests surround your app and become the app themselves.  This removes the need for RPC communication from an external process into the app as well as giving you access to the internal state of your app.  This is an altogether better approach, one that is quicker, more maintainable, scalable to device testing labs.  However, it brings with it, its own set of challenges when trying to make this library work with it.  Traditionally this library has evaluated the Gherkin feature files at run time, then used that evaluation to invoke actions against the app under test.  However, as the tests need to surround the app in the `integration_test` view of the world the Gherkin tests need to be generated at development time so they can be complied in to a test app.  Much like `json_serializable` creates classes that are able to work with json data.
+
+### Steps to get going
+
+1. Add the following `dev_dependencies` to your app's `pubspec.yaml` file
+  - integration_test
+  - build_runner
+  - flutter_gherkin
+2. Add the following `build.yaml` to the root of your project. This file allows the dart code generator to target files outside of your application's `lib` folder
+```yaml
+targets:
+  $default:
+    sources:
+      - lib/**
+      - pubspec.*
+      - $package$
+      # Allows the code generator to target files outside of the lib folder
+      - integration_test/**.dart
+```
+3. Add the following file (and folder) `\test_driver\integration_test_driver.dart`.  This file is the entry point to run your tests.  See `https://flutter.dev/docs/testing/integration-tests` for more information.
+```dart
+import 'package:integration_test/integration_test_driver.dart' as integration_test_driver;
+
+Future<void> main() {
+  // The Gherkin report data send back to this runner by the app after
+  // the tests have run will be saved to this directory
+  integration_test_driver.testOutputsDirectory = 'integration_test/gherkin/reports';
+
+  return integration_test_driver.integrationDriver(
+    timeout: Duration(minutes: 90),
+  );
+}
+```
+4. Create a folder call `integration_test` this will eventually contain all your Gherkin feature files and the generated test files.
+5. Add the following file (and folder) `integration_test\features\counter.feature` with the following below contents.  This is a basic feature file that will be transform in to a test file that can run a test against the sample app.
+```
+Feature: Counter
+
+Scenario: User can increment the counter
+  Given I expect the "counter" to be "0"
+  When I tap the "increment" button
+  Then I expect the "counter" to be "1"
+```
+6. Add the following file (and folder) `integration_test\gherkin_suite_test.dart`.  Notice the attribute `@GherkinTestSuite()` this indicates to the code generator to create a partial file for this file with the generated Gherkin tests in `part 'gherkin_suite_test.g.dart';`.  Don't worry about the initial errors as this will disappear when the tests are generated.
+```dart
+import 'package:flutter_gherkin/flutter_gherkin.dart'; // notice new import name
+import 'package:flutter_test/flutter_test.dart';
+import 'package:gherkin/gherkin.dart';
+
+// The application under test.
+import 'package:example_with_integration_test/main.dart' as app;
+
+part 'gherkin_suite_test.g.dart';
+
+@GherkinTestSuite()
+void main() {
+  executeTestSuite(
+    FlutterTestConfiguration.DEFAULT([])
+      ..reporters = [
+        StdoutReporter(MessageLevel.error)
+          ..setWriteLineFn(print)
+          ..setWriteFn(print),
+        ProgressReporter()
+          ..setWriteLineFn(print)
+          ..setWriteFn(print),
+        TestRunSummaryReporter()
+          ..setWriteLineFn(print)
+          ..setWriteFn(print),
+        JsonReporter(
+          writeReport: (_, __) => Future<void>.value(),
+        ),
+      ],
+    (World world) => app.main(),
+  );
+}
+```
+7. We now need to generate the test by running the builder command from the command line in the root of your project.  Much like `json_serializable` this will create a `.g.dart` part file that will contain the Gherkin tests in code format which are able to via using the `integration_test` package.
+```
+flutter pub run build_runner build
+```
+8. The errors in the `integration_test\gherkin_suite_test.dart` file should have not gone away and it you look in `integration_test\gherkin_suite_test.g.dart` you will see the coded version of the Gherkin tests described in the feature file `integration_test\features\counter.feature`.
+9. We can now run the test using the below command from the root of your project.
+```
+flutter drive --driver=test_driver/integration_test_driver.dart --target=integration_test/gherkin_suite_test.dart
+```
+10. You can debug the tests by adding a breakpoint to line 12 in `integration_test\gherkin_suite_test.dart` and adding the below to your `.vscode\launch.json` file:
+```json
+{
+  "name": "Debug integration_test",
+  "program": "test_driver/integration_test_driver.dart",
+  "cwd": "example_with_integration_test/",
+  "request": "launch",
+  "type": "dart",
+  "args": [
+    "--target=integration_test/gherkin_suite_test.dart",
+  ],
+}
+```
+11. Custom world need to extend `FlutterWorld` note `FlutterDriverWorld`.
+12. If you change any of the feature files you will need to re-generate the tests using the below command
+```
+# you might need to run the clean command first if you have just changed feature files
+flutter pub run build_runner clean
+
+flutter pub run build_runner build
+```
+
+## [2.0.0] - 25/05/2021
+ * null-safety migration, thanks to @tshedor
+
+## [1.2.0] - 02/05/2021
+
+* Upgraded to the null-safety version of dart_gherkin, as such there are some breaking changes to be aware of (see https://github.com/jonsamwell/dart_gherkin/blob/master/CHANGELOG.md for the full list):
+  - BREAKING CHANGE: Table has been renamed to GherkinTable to avoid naming clashes
+  - BREAKING CHANGE: exitAfterTestRun configuration option has been removed as it depends on importing dart:io which is not available under certain environments (dartjs for example).
+  - BREAKING CHANGE: Reporter->onException() exception parameter is now an object rather than an exception
+  - POSSIBLE BREAKING CHANGE: Feature file discovery has been refactored to abstract it from the external Glob dependency. It now support the three native dart Patterns (String, RegExp & Glob). There is potential here for your patterns to not work anymore due as the default IoFeatureFileAccessor assumes the current directory is the working directory to search from. For the most part this simple regex is probably enough to get you going.
+
+  ```
+  RegExp('features/*.*.feature')
+  ```
+
+* Allow dart-define to be passed to the Flutter build (thanks @Pholey)
+
 ## [2.0.0] - 25/05/2021
  * null-safety migration, thanks to @tshedor
 

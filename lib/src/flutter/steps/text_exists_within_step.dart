@@ -1,4 +1,3 @@
-import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_gherkin/flutter_gherkin.dart';
 import 'package:gherkin/gherkin.dart';
 
@@ -9,20 +8,19 @@ import '../parameters/existence_parameter.dart';
 /// Examples:
 ///
 ///   `Then I expect the text "Logout" to be present within the "user_settings_list"`
-///   `But I expect the text "Signup" to be absent within the "login_screen"`
-StepDefinitionGeneric TextExistsWithinStep() {
+///   `But I expect the text "Sign up" to be absent within the "login_screen"`
+StepDefinitionGeneric textExistsWithinStep() {
   return then3<String, Existence, String, FlutterWorld>(
     RegExp(
         r'I expect the text {string} to be {existence} within the {string}$'),
     (text, exists, ancestorKey, context) async {
-      final finder = find.descendant(
-        of: find.byValueKey(ancestorKey),
-        matching: find.text(text),
+      final finder = context.world.appDriver.findByDescendant(
+        context.world.appDriver.findBy(ancestorKey, FindType.key),
+        context.world.appDriver.findBy(text, FindType.text),
         firstMatchOnly: true,
       );
 
-      final isPresent = await FlutterDriverUtils.isPresent(
-        context.world.driver,
+      final isPresent = await context.world.appDriver.isPresent(
         finder,
       );
 

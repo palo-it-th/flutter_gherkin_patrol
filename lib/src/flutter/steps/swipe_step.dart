@@ -1,15 +1,14 @@
-import 'package:meta/meta.dart';
-import 'package:flutter_driver/flutter_driver.dart';
-import 'package:flutter_gherkin/src/flutter/flutter_world.dart';
+// ignore_for_file: avoid_renaming_method_parameters
+
+import 'package:flutter_gherkin/flutter_gherkin.dart';
 import 'package:gherkin/gherkin.dart';
 
 import '../parameters/swipe_direction_parameter.dart';
 
 mixin _SwipeHelper
     on When3WithWorld<SwipeDirection, int, String, FlutterWorld> {
-  @protected
   Future<void> swipeOnFinder(
-    SerializableFinder finder,
+    dynamic finder,
     SwipeDirection direction,
     int swipeAmount,
   ) async {
@@ -17,22 +16,20 @@ mixin _SwipeHelper
       final offset =
           direction == SwipeDirection.right ? swipeAmount : (swipeAmount * -1);
 
-      await world.driver?.scroll(
+      await world.appDriver.scroll(
         finder,
-        offset.toDouble(),
-        0,
-        Duration(milliseconds: 500),
+        dx: offset.toDouble(),
+        duration: const Duration(milliseconds: 500),
         timeout: timeout,
       );
     } else {
       final offset =
           direction == SwipeDirection.up ? swipeAmount : (swipeAmount * -1);
 
-      await world.driver?.scroll(
+      await world.appDriver.scroll(
         finder,
-        0,
-        offset.toDouble(),
-        Duration(milliseconds: 500),
+        dy: offset.toDouble(),
+        duration: const Duration(milliseconds: 500),
         timeout: timeout,
       );
     }
@@ -54,13 +51,13 @@ class SwipeOnKeyStep
     int swipeAmount,
     String key,
   ) async {
-    final finder = find.byValueKey(key);
+    final finder = world.appDriver.findBy(key, FindType.key);
     await swipeOnFinder(finder, direction, swipeAmount);
   }
 
   @override
   RegExp get pattern =>
-      RegExp(r'I swipe {swipe_direction} by {int} pixels on the {string}$');
+      RegExp(r'I swipe {swipe_direction} by {int} pixels on the {string}');
 }
 
 /// Swipes in a cardinal direction on a widget discovered by its test.
@@ -77,7 +74,7 @@ class SwipeOnTextStep
     int swipeAmount,
     String text,
   ) async {
-    final finder = find.text(text);
+    final finder = world.appDriver.findBy(text, FindType.text);
     await swipeOnFinder(finder, direction, swipeAmount);
   }
 

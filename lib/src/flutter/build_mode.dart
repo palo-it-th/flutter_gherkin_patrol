@@ -1,1 +1,0 @@
-enum BuildMode { Debug, Profile }
